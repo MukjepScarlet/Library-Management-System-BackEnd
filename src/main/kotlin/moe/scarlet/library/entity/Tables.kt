@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType
 import com.baomidou.mybatisplus.annotation.TableId
 import com.baomidou.mybatisplus.annotation.TableName
 import java.math.BigDecimal
-import java.sql.Date
-import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @TableName("users")
 data class User(
@@ -17,7 +17,7 @@ data class User(
     val password: String,
     val email: String,
     val roleId: Long,
-    val createDate: Date,
+    val createDate: LocalDate,
     val bookNum: Int,
     val fine: BigDecimal
 )
@@ -38,7 +38,7 @@ data class Book(
     val price: BigDecimal,
     val num: Int,
     val position: String,
-    val date: Date
+    val date: LocalDate
 )
 
 @TableName("labels")
@@ -53,8 +53,8 @@ data class Notice(
     val id: Long,
     val title: String,
     val content: String,
-    val createTime: Timestamp,
-    val updateTime: Timestamp,
+    val createTime: LocalDateTime,
+    val updateTime: LocalDateTime,
     val viewNum: Int
 )
 
@@ -64,7 +64,7 @@ data class BorrowInfo(
     val id: Long,
     val isbn: String,
     val userId: Long,
-    val beginTime: Timestamp,
-    val returnTime: Timestamp,
+    val beginTime: LocalDateTime,
+    val returnTime: LocalDateTime,
     val fine: BigDecimal
 )

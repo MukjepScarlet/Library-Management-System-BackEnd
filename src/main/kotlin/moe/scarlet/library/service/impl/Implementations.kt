@@ -10,7 +10,7 @@ import moe.scarlet.library.service.IUserService
 import moe.scarlet.library.service.QueryResult
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.sql.Date
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.jvm.optionals.getOrNull
@@ -73,7 +73,7 @@ class UserServiceImpl : AbstractServiceImpl<User>(), IUserService {
             password = password,
             email = email,
             roleId = 1L, // normal
-            createDate = Date(System.currentTimeMillis()),
+            createDate = LocalDate.now(),
             bookNum = 0,
             fine = BigDecimal.ZERO
         )
