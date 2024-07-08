@@ -39,7 +39,7 @@ abstract class AbstractServiceImpl<T> : ServiceImpl<BaseMapper<T>, T>(), ISearch
             it.orderBy(true, order.lowercase() == "asc", sortBy)
 
         QueryResult(
-            cnt, if (cnt != 0L) this.list(it.last("LIMIT $start, $count")) else emptyList()
+            cnt, if (cnt != 0L && count != 0) this.list(it.last("LIMIT $start, $count")) else emptyList()
         )
     }
 }
