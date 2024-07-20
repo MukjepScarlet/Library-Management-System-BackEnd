@@ -2,6 +2,7 @@ package moe.scarlet.library.web.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import moe.scarlet.library.annotation.RequiresPermission
 import moe.scarlet.library.extension.checkLogin
 import moe.scarlet.library.extension.setLogin
 import moe.scarlet.library.service.impl.*
@@ -9,7 +10,6 @@ import moe.scarlet.library.web.response.JsonResult
 import moe.scarlet.library.web.response.Status
 import org.springframework.web.bind.annotation.*
 import java.io.Serializable
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
@@ -68,6 +68,7 @@ class DynamicController(
         return JsonResult(Status.SUCCESS)
     }
 
+    @RequiresPermission("view")
     @GetMapping("/query/{tableName}")
     fun <T> query(
         @PathVariable tableName: String,
@@ -80,6 +81,7 @@ class DynamicController(
         @RequestParam count: Int = 1
     ) = JsonResult(Status.SUCCESS, this[tableName].query(searchBy, query, match, sortBy, order, start, count))
 
+    @RequiresPermission("view")
     @DeleteMapping("/return/{userId}")
     fun returnBorrowed(@PathVariable userId: Long, @RequestBody items: List<Long>) =
         this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
@@ -89,10 +91,12 @@ class DynamicController(
     /**
      * 书不够的情况前端处理
      */
+    @RequiresPermission("view")
     @PutMapping("/borrow/{userId}")
     fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
         this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
 
+    @RequiresPermission("view")
     @GetMapping("/personal/{userId}")
     fun myBorrow(
         @PathVariable userId: Long,
@@ -108,14 +112,17 @@ class DynamicController(
         this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
     )
 
+    @RequiresPermission("manage")
     @PutMapping("/add/{tableName}")
     fun <T> add(@PathVariable tableName: String, @RequestBody item: T) =
         (this[tableName] as AbstractServiceImpl<T>).save(item).asJsonResult()
 
+    @RequiresPermission("manage")
     @DeleteMapping("/remove/{tableName}")
     fun <T> remove(@PathVariable tableName: String, @RequestBody items: List<Serializable>) =
         (this[tableName] as AbstractServiceImpl<T>).removeByIds(items).asJsonResult()
 
+    @RequiresPermission("manage")
     @PutMapping("/modify/{tableName}")
     fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
         (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
