@@ -29,13 +29,7 @@ class DefaultInterceptor(
 
         val requiresPermission = handler.method.getAnnotation(RequiresPermission::class.java) ?: return true
 
-        val idNumber = request.checkLogin() ?: run {
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
-            response.writer.write("Unauthorized")
-            return false
-        }
-
-        val user = userService.getByIdNumber(idNumber) ?: run {
+        val user = request.checkLogin()?.let(userService::getByIdNumber) ?: run {
             response.status = HttpServletResponse.SC_UNAUTHORIZED
             response.writer.write("Unauthorized")
             return false
