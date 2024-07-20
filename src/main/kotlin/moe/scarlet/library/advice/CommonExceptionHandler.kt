@@ -13,6 +13,6 @@ class CommonExceptionHandler {
     fun runTimeExp(e: RuntimeException, resp: HttpServletResponse): JsonResult {
         e.printStackTrace()
         resp.contentType = "application/json;charset=utf-8"
-        return JsonResult(Status.INTERNAL_ERROR)
+        return JsonResult(Status.INTERNAL_ERROR, e.localizedMessage)
     }
 }
