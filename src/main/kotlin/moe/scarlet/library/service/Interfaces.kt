@@ -36,4 +36,5 @@ interface IBorrowInfoService : ISearchable<BorrowInfo> {
 interface IUserService : ISearchable<User> {
     fun register(studentIdNumber: String, password: String, email: String): User
     fun login(idNumber: String, password: String): User?
+    fun getByIdNumber(idNumber: String): User?
 }

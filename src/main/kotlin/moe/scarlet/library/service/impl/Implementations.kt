@@ -35,8 +35,7 @@ abstract class AbstractServiceImpl<T> : ServiceImpl<BaseMapper<T>, T>(), ISearch
 
         val cnt = this.count(it)
 
-        if (sortBy.isNotBlank())
-            it.orderBy(true, order.lowercase() == "asc", sortBy)
+        it.orderBy(sortBy.isNotBlank(), order.lowercase() == "asc", sortBy)
 
         QueryResult(
             cnt, if (cnt != 0L && count != 0) this.list(it.last("LIMIT $start, $count")) else emptyList()
@@ -93,6 +92,11 @@ class UserServiceImpl : AbstractServiceImpl<User>(), IUserService {
     override fun login(idNumber: String, password: String): User? =
         this.getOneOpt(
             QueryWrapper<User>().eq("id_number", idNumber).eq("password", password).last("LIMIT 1")
+        ).getOrNull()
+
+    override fun getByIdNumber(idNumber: String): User? =
+        this.getOneOpt(
+            QueryWrapper<User>().eq("id_number", idNumber).last("LIMIT 1")
         ).getOrNull()
 }
 

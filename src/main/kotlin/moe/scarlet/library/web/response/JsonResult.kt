@@ -11,7 +11,7 @@ data class JsonResult(val status: Status, val data: Any? = null) {
 enum class Status(val code: Int, val message: String) {
     SUCCESS(200, "操作成功"),
     WRONG_AUTH(401, "账号或密码错误"),
-    NO_LOGIN_ERROR(411, "未检测到登录状态"),
-    NO_AUTH_ERROR(413, "操作权限不足"),
+    AUTH_EXPIRED(421, "登录过期, 请重新登录"),
+    NO_AUTH_ERROR(403, "操作权限不足"),
     INTERNAL_ERROR(500, "服务器内部出错, 请联系管理员"),
 }

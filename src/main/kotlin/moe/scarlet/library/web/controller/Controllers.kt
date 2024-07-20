@@ -1,6 +1,10 @@
 package moe.scarlet.library.web.controller
 
-import moe.scarlet.library.entity.*
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import moe.scarlet.library.entity.User
+import moe.scarlet.library.extension.checkLogin
+import moe.scarlet.library.extension.setLogin
 import moe.scarlet.library.service.impl.*
 import moe.scarlet.library.web.response.*
 import org.springframework.web.bind.annotation.*
@@ -71,16 +75,35 @@ class DynamicController(
         this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
     )
 
+    @GetMapping
+    fun currentUser(request: HttpServletRequest, response: HttpServletResponse): JsonResult {
+        val user = request.checkLogin()?.let(this.userService::getByIdNumber) ?: return JsonResult(Status.AUTH_EXPIRED)
+        response.setLogin(user.idNumber)
+        return JsonResult(Status.SUCCESS, user)
+    }
+
     data class RegisterParams(val studentIdNumber: String, val password: String, val email: String)
 
-    @PutMapping("/register/")
-    fun register(@RequestBody params: RegisterParams) =
-        JsonResult(Status.SUCCESS, this.userService.register(params.studentIdNumber, params.password, params.email))
+    @PutMapping("/register")
+    fun register(@RequestBody params: RegisterParams, response: HttpServletResponse): JsonResult {
+        val user = this.userService.register(params.studentIdNumber, params.password, params.email)
+        response.setLogin(user.idNumber)
+        return JsonResult(Status.SUCCESS, user)
+    }
 
     data class LoginParams(val idNumber: String, val password: String)
 
-    @PutMapping("/login/")
-    fun login(@RequestBody params: LoginParams) = this.userService.login(params.idNumber, params.password)
-        .let { JsonResult(if (it == null) Status.WRONG_AUTH else Status.SUCCESS, it) }
+    @PutMapping("/login")
+    fun login(@RequestBody params: LoginParams, response: HttpServletResponse): JsonResult {
+        val user = this.userService.login(params.idNumber, params.password) ?: return JsonResult(Status.WRONG_AUTH)
+        response.setLogin(user.idNumber)
+        return JsonResult(Status.SUCCESS, user)
+    }
+
+    @PutMapping("/logout")
+    fun logout(response: HttpServletResponse): JsonResult {
+        response.setLogin(null)
+        return JsonResult(Status.SUCCESS)
+    }
 
 }
