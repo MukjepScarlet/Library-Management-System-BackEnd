@@ -57,6 +57,10 @@ class BorrowInfoServiceImpl : AbstractServiceImpl<BorrowInfo>(), IBorrowInfoServ
     ) = this.query(searchBy, query, match, sortBy, order, start, count) {
         it.eq("user_id", userId)
     }
+
+    override fun newBorrow(userId: Long, isbn: String, returnTime: LocalDateTime) =
+        this.save(BorrowInfo(0L, isbn, userId, LocalDateTime.now(), returnTime, BigDecimal.ZERO))
+
 }
 
 @Service

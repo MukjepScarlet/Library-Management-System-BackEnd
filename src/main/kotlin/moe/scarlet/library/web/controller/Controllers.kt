@@ -2,13 +2,14 @@ package moe.scarlet.library.web.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import moe.scarlet.library.entity.User
 import moe.scarlet.library.extension.checkLogin
 import moe.scarlet.library.extension.setLogin
 import moe.scarlet.library.service.impl.*
-import moe.scarlet.library.web.response.*
+import moe.scarlet.library.web.response.JsonResult
+import moe.scarlet.library.web.response.Status
 import org.springframework.web.bind.annotation.*
 import java.io.Serializable
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
@@ -59,6 +60,15 @@ class DynamicController(
     @PutMapping("/modify/{tableName}")
     fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
         (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
+
+    data class BorrowParams(val isbn: String, val returnTime: LocalDateTime)
+
+    /**
+     * 书不够的情况前端处理
+     */
+    @PutMapping("/borrow/{userId}")
+    fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
+        this.borrowInfoService.newBorrow(userId, params.isbn, params.returnTime).asJsonResult()
 
     @GetMapping("/personal/{userId}")
     fun myBorrow(
