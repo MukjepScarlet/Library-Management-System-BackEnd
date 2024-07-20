@@ -2,6 +2,7 @@ package moe.scarlet.library.service.impl
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.mapper.BaseMapper
+import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import moe.scarlet.library.entity.*
 import moe.scarlet.library.service.IBorrowInfoService
@@ -58,9 +59,12 @@ class BorrowInfoServiceImpl : AbstractServiceImpl<BorrowInfo>(), IBorrowInfoServ
         it.eq("user_id", userId)
     }
 
-    override fun newBorrow(userId: Long, isbn: String, borrowDays: Long) =
-        this.save(BorrowInfo(0L, isbn, userId, LocalDateTime.now(), LocalDateTime.now().plusDays(borrowDays), BigDecimal.ZERO))
+    override fun newBorrow(userId: Long, isbn: String, borrowDays: Long) = LocalDateTime.now().let {
+        this.save(BorrowInfo(0L, isbn, userId, it, it.plusDays(borrowDays), BigDecimal.ZERO))
+    }
 
+    override fun returnBorrowed(userId: Long, idList: List<Long>) =
+        this.remove(KtQueryWrapper(BorrowInfo::class.java).eq(BorrowInfo::userId, userId).`in`(BorrowInfo::id, idList))
 }
 
 @Service

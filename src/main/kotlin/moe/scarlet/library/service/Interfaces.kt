@@ -34,6 +34,8 @@ interface IBorrowInfoService : ISearchable<BorrowInfo> {
     ): QueryResult<BorrowInfo>
 
     fun newBorrow(userId: Long, isbn: String, borrowDays: Long): Boolean
+
+    fun returnBorrowed(userId: Long, idList: List<Long>): Boolean
 }
 
 interface IUserService : ISearchable<User> {

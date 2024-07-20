@@ -61,6 +61,10 @@ class DynamicController(
     fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
         (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
 
+    @DeleteMapping("/return/{userId}")
+    fun returnBorrowed(@PathVariable userId: Long, @RequestBody items: List<Long>) =
+        this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
+
     data class BorrowParams(val isbn: String, val borrowDays: Long)
 
     /**
