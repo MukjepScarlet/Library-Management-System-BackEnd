@@ -99,12 +99,12 @@ class UserServiceImpl : AbstractServiceImpl<User>(), IUserService {
 
     override fun login(idNumber: String, password: String): User? =
         this.getOneOpt(
-            QueryWrapper<User>().eq("id_number", idNumber).eq("password", password).last("LIMIT 1")
+            KtQueryWrapper(User::class.java).eq(User::idNumber, idNumber).eq(User::password, password).last("LIMIT 1")
         ).getOrNull()
 
     override fun getByIdNumber(idNumber: String): User? =
         this.getOneOpt(
-            QueryWrapper<User>().eq("id_number", idNumber).last("LIMIT 1")
+            KtQueryWrapper(User::class.java).eq(User::idNumber, idNumber).last("LIMIT 1")
         ).getOrNull()
 }
 
