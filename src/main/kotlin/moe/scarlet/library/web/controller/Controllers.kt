@@ -37,58 +37,6 @@ class DynamicController(
 
     private fun Boolean.asJsonResult() = JsonResult(if (this) Status.SUCCESS else Status.INTERNAL_ERROR)
 
-    @GetMapping("/query/{tableName}")
-    fun <T> query(
-        @PathVariable tableName: String,
-        @RequestParam searchBy: String = "",
-        @RequestParam query: String = "",
-        @RequestParam match: String = "eq",
-        @RequestParam sortBy: String = "",
-        @RequestParam order: String = "asc",
-        @RequestParam start: Int = 0,
-        @RequestParam count: Int = 1
-    ) = JsonResult(Status.SUCCESS, this[tableName].query(searchBy, query, match, sortBy, order, start, count))
-
-    @PutMapping("/add/{tableName}")
-    fun <T> add(@PathVariable tableName: String, @RequestBody item: T) =
-        (this[tableName] as AbstractServiceImpl<T>).save(item).asJsonResult()
-
-    @DeleteMapping("/remove/{tableName}")
-    fun <T> remove(@PathVariable tableName: String, @RequestBody items: List<Serializable>) =
-        (this[tableName] as AbstractServiceImpl<T>).removeByIds(items).asJsonResult()
-
-    @PutMapping("/modify/{tableName}")
-    fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
-        (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
-
-    @DeleteMapping("/return/{userId}")
-    fun returnBorrowed(@PathVariable userId: Long, @RequestBody items: List<Long>) =
-        this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
-
-    data class BorrowParams(val isbn: String, val borrowDays: Long)
-
-    /**
-     * 书不够的情况前端处理
-     */
-    @PutMapping("/borrow/{userId}")
-    fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
-        this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
-
-    @GetMapping("/personal/{userId}")
-    fun myBorrow(
-        @PathVariable userId: Long,
-        @RequestParam searchBy: String = "",
-        @RequestParam query: String = "",
-        @RequestParam match: String = "eq",
-        @RequestParam sortBy: String = "",
-        @RequestParam order: String = "asc",
-        @RequestParam start: Int = 0,
-        @RequestParam count: Int = 1
-    ) = JsonResult(
-        Status.SUCCESS,
-        this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
-    )
-
     @GetMapping
     fun currentUser(request: HttpServletRequest, response: HttpServletResponse): JsonResult {
         val user = request.checkLogin()?.let(this.userService::getByIdNumber) ?: return JsonResult(Status.AUTH_EXPIRED)
@@ -119,5 +67,57 @@ class DynamicController(
         response.setLogin(null)
         return JsonResult(Status.SUCCESS)
     }
+
+    @GetMapping("/query/{tableName}")
+    fun <T> query(
+        @PathVariable tableName: String,
+        @RequestParam searchBy: String = "",
+        @RequestParam query: String = "",
+        @RequestParam match: String = "eq",
+        @RequestParam sortBy: String = "",
+        @RequestParam order: String = "asc",
+        @RequestParam start: Int = 0,
+        @RequestParam count: Int = 1
+    ) = JsonResult(Status.SUCCESS, this[tableName].query(searchBy, query, match, sortBy, order, start, count))
+
+    @DeleteMapping("/return/{userId}")
+    fun returnBorrowed(@PathVariable userId: Long, @RequestBody items: List<Long>) =
+        this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
+
+    data class BorrowParams(val isbn: String, val borrowDays: Long)
+
+    /**
+     * 书不够的情况前端处理
+     */
+    @PutMapping("/borrow/{userId}")
+    fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
+        this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
+
+    @GetMapping("/personal/{userId}")
+    fun myBorrow(
+        @PathVariable userId: Long,
+        @RequestParam searchBy: String = "",
+        @RequestParam query: String = "",
+        @RequestParam match: String = "eq",
+        @RequestParam sortBy: String = "",
+        @RequestParam order: String = "asc",
+        @RequestParam start: Int = 0,
+        @RequestParam count: Int = 1
+    ) = JsonResult(
+        Status.SUCCESS,
+        this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
+    )
+
+    @PutMapping("/add/{tableName}")
+    fun <T> add(@PathVariable tableName: String, @RequestBody item: T) =
+        (this[tableName] as AbstractServiceImpl<T>).save(item).asJsonResult()
+
+    @DeleteMapping("/remove/{tableName}")
+    fun <T> remove(@PathVariable tableName: String, @RequestBody items: List<Serializable>) =
+        (this[tableName] as AbstractServiceImpl<T>).removeByIds(items).asJsonResult()
+
+    @PutMapping("/modify/{tableName}")
+    fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
+        (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
 
 }
