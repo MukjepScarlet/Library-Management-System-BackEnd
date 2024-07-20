@@ -68,7 +68,6 @@ class DynamicController(
         return JsonResult(Status.SUCCESS)
     }
 
-    @RequiresPermission("view")
     @GetMapping("/query/{tableName}")
     fun <T> query(
         @PathVariable tableName: String,
