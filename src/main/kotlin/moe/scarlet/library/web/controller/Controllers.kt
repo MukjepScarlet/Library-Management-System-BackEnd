@@ -61,14 +61,14 @@ class DynamicController(
     fun <T> modify(@PathVariable tableName: String, @RequestBody item: T) =
         (this[tableName] as AbstractServiceImpl<T>).updateById(item).asJsonResult()
 
-    data class BorrowParams(val isbn: String, val returnTime: LocalDateTime)
+    data class BorrowParams(val isbn: String, val borrowDays: Long)
 
     /**
      * 书不够的情况前端处理
      */
     @PutMapping("/borrow/{userId}")
     fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
-        this.borrowInfoService.newBorrow(userId, params.isbn, params.returnTime).asJsonResult()
+        this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
 
     @GetMapping("/personal/{userId}")
     fun myBorrow(

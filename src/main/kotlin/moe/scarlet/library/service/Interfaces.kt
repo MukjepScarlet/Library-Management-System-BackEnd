@@ -33,7 +33,7 @@ interface IBorrowInfoService : ISearchable<BorrowInfo> {
         count: Int
     ): QueryResult<BorrowInfo>
 
-    fun newBorrow(userId: Long, isbn: String, returnTime: LocalDateTime): Boolean
+    fun newBorrow(userId: Long, isbn: String, borrowDays: Long): Boolean
 }
 
 interface IUserService : ISearchable<User> {

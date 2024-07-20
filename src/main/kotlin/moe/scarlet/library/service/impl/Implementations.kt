@@ -58,8 +58,8 @@ class BorrowInfoServiceImpl : AbstractServiceImpl<BorrowInfo>(), IBorrowInfoServ
         it.eq("user_id", userId)
     }
 
-    override fun newBorrow(userId: Long, isbn: String, returnTime: LocalDateTime) =
-        this.save(BorrowInfo(0L, isbn, userId, LocalDateTime.now(), returnTime, BigDecimal.ZERO))
+    override fun newBorrow(userId: Long, isbn: String, borrowDays: Long) =
+        this.save(BorrowInfo(0L, isbn, userId, LocalDateTime.now(), LocalDateTime.now().plusDays(borrowDays), BigDecimal.ZERO))
 
 }
 
