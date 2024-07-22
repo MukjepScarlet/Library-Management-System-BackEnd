@@ -3,6 +3,7 @@ package moe.scarlet.library.web.controller
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import moe.scarlet.library.annotation.RequiresPermission
+import moe.scarlet.library.entity.User
 import moe.scarlet.library.extension.checkLogin
 import moe.scarlet.library.extension.setLogin
 import moe.scarlet.library.service.impl.*
@@ -37,9 +38,12 @@ class DynamicController(
 
     private fun Boolean.asJsonResult() = JsonResult(if (this) Status.SUCCESS else Status.INTERNAL_ERROR)
 
+    private val HttpServletRequest.currentUser: User?
+        get() = this.checkLogin()?.let(userService::getByIdNumber)
+
     @GetMapping
-    fun currentUser(request: HttpServletRequest, response: HttpServletResponse): JsonResult {
-        val user = request.checkLogin()?.let(this.userService::getByIdNumber) ?: return JsonResult(Status.AUTH_EXPIRED)
+    fun getProfile(request: HttpServletRequest, response: HttpServletResponse): JsonResult {
+        val user = request.currentUser ?: return JsonResult(Status.AUTH_EXPIRED)
         response.setLogin(user.idNumber)
         return JsonResult(Status.SUCCESS, user)
     }
@@ -81,10 +85,15 @@ class DynamicController(
     ) = JsonResult(Status.SUCCESS, this[tableName].query(searchBy, query, match, sortBy, order, start, count))
 
     @RequiresPermission("view")
+    @PutMapping
+    fun setProfile(@RequestBody user: User, request: HttpServletRequest) =
+        if (request.currentUser?.userId != user.userId) JsonResult(Status.WRONG_AUTH)
+        else this.userService.updateById(user).asJsonResult()
+
+    @RequiresPermission("view")
     @DeleteMapping("/return")
     fun returnBorrowed(@RequestBody items: List<Long>, request: HttpServletRequest): JsonResult {
-        val userId =
-            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        val userId = request.currentUser?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
         return this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
     }
 
@@ -96,8 +105,7 @@ class DynamicController(
     @RequiresPermission("view")
     @PutMapping("/borrow")
     fun borrow(@RequestBody params: BorrowParams, request: HttpServletRequest): JsonResult {
-        val userId =
-            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        val userId = request.currentUser?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
         return this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
     }
 
@@ -113,8 +121,7 @@ class DynamicController(
         @RequestParam count: Int = 1,
         request: HttpServletRequest
     ): JsonResult {
-        val userId =
-            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        val userId = request.currentUser?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
         return JsonResult(
             Status.SUCCESS,
             this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
