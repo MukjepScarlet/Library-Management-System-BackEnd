@@ -81,9 +81,12 @@ class DynamicController(
     ) = JsonResult(Status.SUCCESS, this[tableName].query(searchBy, query, match, sortBy, order, start, count))
 
     @RequiresPermission("view")
-    @DeleteMapping("/return/{userId}")
-    fun returnBorrowed(@PathVariable userId: Long, @RequestBody items: List<Long>) =
-        this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
+    @DeleteMapping("/return")
+    fun returnBorrowed(@RequestBody items: List<Long>, request: HttpServletRequest): JsonResult {
+        val userId =
+            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        return this.borrowInfoService.returnBorrowed(userId, items).asJsonResult()
+    }
 
     data class BorrowParams(val isbn: String, val borrowDays: Long)
 
@@ -91,25 +94,32 @@ class DynamicController(
      * 书不够的情况前端处理
      */
     @RequiresPermission("view")
-    @PutMapping("/borrow/{userId}")
-    fun borrow(@PathVariable userId: Long, @RequestBody params: BorrowParams) =
-        this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
+    @PutMapping("/borrow")
+    fun borrow(@RequestBody params: BorrowParams, request: HttpServletRequest): JsonResult {
+        val userId =
+            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        return this.borrowInfoService.newBorrow(userId, params.isbn, params.borrowDays).asJsonResult()
+    }
 
     @RequiresPermission("view")
-    @GetMapping("/personal/{userId}")
+    @GetMapping("/personal")
     fun myBorrow(
-        @PathVariable userId: Long,
         @RequestParam searchBy: String = "",
         @RequestParam query: String = "",
         @RequestParam match: String = "eq",
         @RequestParam sortBy: String = "",
         @RequestParam order: String = "asc",
         @RequestParam start: Int = 0,
-        @RequestParam count: Int = 1
-    ) = JsonResult(
-        Status.SUCCESS,
-        this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
-    )
+        @RequestParam count: Int = 1,
+        request: HttpServletRequest
+    ): JsonResult {
+        val userId =
+            request.checkLogin()?.let(this.userService::getByIdNumber)?.userId ?: return JsonResult(Status.AUTH_EXPIRED)
+        return JsonResult(
+            Status.SUCCESS,
+            this.borrowInfoService.myBorrow(userId, searchBy, query, match, sortBy, order, start, count)
+        )
+    }
 
     @RequiresPermission("manage")
     @PutMapping("/add/{tableName}")
